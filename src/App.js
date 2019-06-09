@@ -1,51 +1,28 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import SeasonDisplay  from './SeasonDisplay';
 import Spinner from './Spinner';
 
-class App extends Component {
-    // constructor(props) {
-    //     super(props);
-    //     this.state = { lat: null, errorMessage: '' };
-    // }
+const App = () => {
+  const [lat, setLat] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
 
-    state = { lat: null, errorMessage: '' }; 
-    
-    componentDidMount() {
-        //Getting the Current Position
-        window.navigator.geolocation.getCurrentPosition(
-            position => {
-                // called setState
-                this.setState({ lat: position.coords.latitude });
-            },
-            err => {
-                this.setState({ errorMessage: err.message });
-            }
-        );
-    }
+  useEffect(() => {
+    window.navigator.geolocation.getCurrentPosition(
+      position => setLat(position.coords.latitude),
+      err => setErrorMessage(err.message)
+    ); 
+  }, []);
 
-    componentDidUpdate() { 
-        console.log('My component was just updated - it rerendered!');
-    }
+  let content;
+  if (errorMessage) {
+    content = <div>Error: {errorMessage}</div>
+  } else if (lat) {
+    content = <SeasonDisplay lat={lat} />
+  } else {
+    content = <Spinner message="Please, accept location request for to continue." />
+  }
 
-    renderContent() {
-        if (this.state.errorMessage && !this.state.lat) {
-            return <div>Error: {this.state.errorMessage} </div>;
-        }
-
-        if (!this.state.errorMessage && this.state.lat) {
-            return <SeasonDisplay lat={this.state.lat} />;
-        }
-
-        return <Spinner message="Please, accept location request for to continue." />;
-    }
-
-    render() {
-       return (
-           <div className="border red">
-            {this.renderContent()}
-           </div>
-       ); 
-    }
+  return <div className="border red">{content}</div>
 }
 
 export default App;
